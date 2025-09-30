@@ -154,32 +154,6 @@ public class RootPublicKey {
         return TestKey.NONE;
     }
 
-    /**
-     * Check if the provided value is the SHA-256 digest of a known root public key.
-     * This is useful for fields like verifiedBootKey which store a hash, not the raw key.
-     */
-    public static Status checkDigest(byte[] digest) {
-        if (Arrays.equals(digest, sha256(googleKey))) {
-            return Status.GOOGLE;
-        } else if (Arrays.equals(digest, sha256(aospEcKey))
-                || Arrays.equals(digest, sha256(aospRsa2048Key))
-                || Arrays.equals(digest, sha256(aospRsa4096Key))
-                || Arrays.equals(digest, sha256(aospRsa8192Key))) {
-            return Status.AOSP;
-        } else if (Arrays.equals(digest, sha256(knoxSakv2Key))
-                || Arrays.equals(digest, sha256(knoxSakv1Key))
-                || Arrays.equals(digest, sha256(knoxSakmv1Key))) {
-            return Status.KNOX;
-        } else if (oemKeys != null) {
-            for (var key : oemKeys) {
-                if (Arrays.equals(digest, sha256(key.getEncoded()))) {
-                    return Status.OEM;
-                }
-            }
-        }
-        return Status.UNKNOWN;
-    }
-
     public static Status check(byte[] publicKey) {
         if (Arrays.equals(publicKey, googleKey)) {
             return Status.GOOGLE;
