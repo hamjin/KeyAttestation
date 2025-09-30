@@ -121,6 +121,17 @@ public record RevocationList(String status, String reason) {
 
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
+                // 从 HTTP 响应头获取 Last-Modified 时间
+                String lastModifiedHeader = connection.getHeaderField("Last-Modified");
+                long serverLastModified = 0;
+                if (lastModifiedHeader != null) {
+                    try {
+                        serverLastModified = connection.getHeaderFieldDate("Last-Modified", 0);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Failed to parse Last-Modified header", e);
+                    }
+                }
+
                 // 下载并保存到本地
                 File statusFile = new File(context.getFilesDir(), STATUS_FILE);
                 try (var input = connection.getInputStream();
@@ -137,15 +148,22 @@ public record RevocationList(String status, String reason) {
                     data = parseStatus(input);
                 }
 
-                // 保存更新时间和发布时间
+                // 如果从响应头获取到了服务器的最后修改时间，优先使用它
+                // 否则使用当前时间作为更新时间
                 var prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                lastUpdate = System.currentTimeMillis();
+                if (serverLastModified > 0) {
+                    lastUpdate = serverLastModified;
+                } else {
+                    lastUpdate = System.currentTimeMillis();
+                }
+
                 prefs.edit()
                     .putLong(KEY_LAST_UPDATE, lastUpdate)
                     .putString(KEY_PUBLISH_TIME, publishTime)
                     .apply();
 
-                Log.i(TAG, "Successfully updated revocation list from network");
+                Log.i(TAG, "Successfully updated revocation list from network. Last-Modified: " +
+                    (serverLastModified > 0 ? new java.util.Date(serverLastModified) : "not available"));
                 return true;
             } else {
                 Log.w(TAG, "Failed to update revocation list: HTTP " + responseCode);
