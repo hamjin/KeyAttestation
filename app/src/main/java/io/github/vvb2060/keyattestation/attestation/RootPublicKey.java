@@ -112,16 +112,6 @@ public class RootPublicKey {
         return set;
     }
 
-    private static byte[] sha256(byte[] input) {
-        try {
-            var md = MessageDigest.getInstance("SHA-256");
-            return md.digest(input);
-        } catch (NoSuchAlgorithmException e) {
-            // Should never happen on Android
-            throw new RuntimeException(e);
-        }
-    }
-
     private static byte[] hexToBytes(String hex) {
         int len = hex.length();
         byte[] data = new byte[len / 2];
