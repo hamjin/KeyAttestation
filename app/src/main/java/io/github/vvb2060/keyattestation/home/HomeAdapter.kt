@@ -140,19 +140,6 @@ class HomeAdapter(listener: Listener) : IdBasedRecyclerViewAdapter() {
             }
         }
 
-        // If verifiedBootKey hash corresponds to AOSP, show a warning header
-        attestationData.rootOfTrust?.verifiedBootKey?.let { vbk ->
-            val status = RootPublicKey.checkDigest(vbk)
-            if (status == RootPublicKey.Status.AOSP) {
-                addItemAt(if (testKeyShown) 3 else 2, HeaderViewHolder.CREATOR, HeaderData(
-                    R.string.aosp_root_cert,
-                    R.string.aosp_root_cert_summary,
-                    R.drawable.ic_error_outline_24,
-                    rikka.material.R.attr.colorWarning
-                ), ID_VB_AOSP_WARNING)
-            }
-        }
-
         var id = ID_DESCRIPTION_START
         val attestation = attestationData.showAttestation ?: return
         addItem(CommonItemViewHolder.SECURITY_LEVEL_CREATOR, SecurityLevelData(
@@ -318,8 +305,7 @@ class HomeAdapter(listener: Listener) : IdBasedRecyclerViewAdapter() {
         private const val ID_ERROR = 0L
         private const val ID_CERT_STATUS = 1L
         private const val ID_BOOT_STATUS = 2L
-        private const val ID_VB_TESTKEY_WARNING = 4L
-        private const val ID_VB_AOSP_WARNING = 3L
+        private const val ID_VB_TESTKEY_WARNING = 3L
         private const val ID_CERT_INFO_START = 1000L
         private const val ID_RKP_HOSTNAME = 2000L
         private const val ID_DESCRIPTION_START = 3000L
