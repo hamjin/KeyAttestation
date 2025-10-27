@@ -37,6 +37,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 
 import javax.security.auth.x500.X500Principal;
@@ -47,10 +48,10 @@ import rikka.shizuku.ShizukuApiConstants;
 
 public class AndroidKeyStore extends IAndroidKeyStore.Stub {
     private final KeyStore keyStore;
-    private final KeyPairGenerator keyPairGenerator;
+    private final HashMap<Byte,KeyPairGenerator> keyPairGenerators = new HashMap<>();
     private int clientUid = -1;
 
-    public AndroidKeyStore(byte keyStoreKeyType) throws Exception {
+    public AndroidKeyStore() throws Exception {
         if (Os.geteuid() < Process.FIRST_APPLICATION_UID) {
             fixEnv();
             var pm = ActivityThread.currentApplication().getPackageManager();
@@ -58,16 +59,8 @@ public class AndroidKeyStore extends IAndroidKeyStore.Stub {
         }
         keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
-        keyPairGenerator = switch (keyStoreKeyType){
-            case KeyStoreKeyType.ECDSA ->
-                KeyPairGenerator.getInstance(
-                        KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
-            case KeyStoreKeyType.RSA ->
-                KeyPairGenerator.getInstance(
-                        KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-            default ->
-                throw new IllegalStateException("Unimplemented KeyStore type: " + keyStoreKeyType);
-        };
+        keyPairGenerators.put(KeyStoreKeyType.ECDSA, KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore"));
+        keyPairGenerators.put(KeyStoreKeyType.RSA, KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore"));
     }
 
     private static void fixEnv() throws Exception {
@@ -279,6 +272,8 @@ public class AndroidKeyStore extends IAndroidKeyStore.Stub {
         var params = (KeyGenParameterSpec) genParameter(alias, attestKeyAlias, useStrongBox,
                 includeProps, uniqueIdIncluded, keyStoreKeyType, flagsToArray(idFlags));
         try {
+            var keyPairGenerator = keyPairGenerators.get(keyStoreKeyType);
+            assert keyPairGenerator != null;
             keyPairGenerator.initialize(params);
             keyPairGenerator.generateKeyPair();
             if (useSak) {

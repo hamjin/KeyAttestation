@@ -42,7 +42,7 @@ class HomeViewModel(
         }
     }
 
-    private val attestationRepository = AttestationRepository(KeyStoreKeyType.ECDSA)
+    private val attestationRepository = AttestationRepository()
     private val attestationData = MutableLiveData<Resource<BaseData>>()
 
     val hasStrongBox = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&

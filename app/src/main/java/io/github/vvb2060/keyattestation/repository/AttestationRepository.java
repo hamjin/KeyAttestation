@@ -41,8 +41,8 @@ public class AttestationRepository {
     private final List<X509Certificate> currentCerts;
     private IAndroidKeyStore keyStore;
 
-    public AttestationRepository(byte keyStoreKeyType) throws Exception {
-        localKeyStore = new AndroidKeyStore(keyStoreKeyType);
+    public AttestationRepository() throws Exception {
+        localKeyStore = new AndroidKeyStore();
         factory = CertificateFactory.getInstance("X.509");
         currentCerts = new ArrayList<>();
         keyStore = localKeyStore;
