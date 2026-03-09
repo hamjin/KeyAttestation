@@ -133,6 +133,12 @@ class HomeViewModel(
             sp.edit { putBoolean("prefer_attest_rsa_key", value) }
         }
 
+    var revocationListUrl = sp.getString("revocation_list_url", null)
+        set(value) {
+            field = value
+            sp.edit { putString("revocation_list_url", value) }
+        }
+
     init {
         load()
     }
@@ -233,8 +239,8 @@ class HomeViewModel(
         attestationData.postValue(result)
     }
 
-    fun updateRevocationList() = AppApplication.executor.execute {
-        val success = RevocationList.updateFromNetwork()
+    fun updateRevocationList(url: String? = revocationListUrl) = AppApplication.executor.execute {
+        val success = RevocationList.updateFromNetwork(url)
         if (success) {
             AppApplication.toast("Revocation list updated successfully")
         } else {

@@ -3,6 +3,7 @@ package io.github.vvb2060.keyattestation.home
 import android.app.Dialog
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.text.method.LinkMovementMethod
 import android.view.*
 import android.widget.ImageView
@@ -198,7 +199,7 @@ class HomeFragment : AppFragment(), HomeAdapter.Listener, MenuProvider {
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         val status = !item.isChecked
-        item.isChecked = status
+        if (item.isCheckable) item.isChecked = status
         when (item.itemId) {
             R.id.menu_use_shizuku -> {
                 viewModel.preferShizuku = status
@@ -256,7 +257,7 @@ class HomeFragment : AppFragment(), HomeAdapter.Listener, MenuProvider {
                 import.launch("text/xml")
             }
             R.id.menu_update_revocation_list -> {
-                viewModel.updateRevocationList()
+                showRevocationListUrlDialog()
             }
             R.id.menu_revocation_list_info -> {
                 showRevocationListInfo()
@@ -267,6 +268,63 @@ class HomeFragment : AppFragment(), HomeAdapter.Listener, MenuProvider {
             else -> return false
         }
         return true
+    }
+
+    private fun showRevocationListUrlDialog() {
+        val context = requireContext()
+        val urls = arrayOf(
+            "https://android.googleapis.com/attestation/status",
+            "https://hkg-txcloud.jintaiyang123.org/attestation/status",
+            "CUSTOM"
+        )
+        val names = arrayOf(
+            getString(R.string.revocation_list_url_google),
+            getString(R.string.revocation_list_url_hamjin),
+            getString(R.string.revocation_list_url_custom)
+        )
+
+        var selectedIndex = urls.indexOf(viewModel.revocationListUrl)
+        if (selectedIndex == -1) {
+            selectedIndex = if (viewModel.revocationListUrl == null) 0 else 2
+        }
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.revocation_list_url)
+            .setSingleChoiceItems(names, selectedIndex) { dialog, which ->
+                val selectedUrl = urls[which]
+                if (selectedUrl == "CUSTOM") {
+                    showCustomRevocationListUrlDialog(viewModel.revocationListUrl)
+                } else {
+                    viewModel.revocationListUrl = if (which == 0) null else selectedUrl
+                    viewModel.updateRevocationList()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showCustomRevocationListUrlDialog(currentUrl: String?) {
+        val context = requireContext()
+        val dp24 = Math.round(24 * context.resources.displayMetrics.density)
+        val dp18 = Math.round(18 * context.resources.displayMetrics.density)
+        val editText = AppCompatEditText(context)
+        editText.setHint("https://")
+        editText.setText(currentUrl)
+        editText.inputType = InputType.TYPE_TEXT_VARIATION_URI
+        editText.setPadding(dp24, dp18, dp24, dp18)
+        editText.requestFocus()
+
+        AlertDialog.Builder(context)
+            .setView(editText)
+            .setTitle(R.string.revocation_list_url_custom)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val url = editText.text?.toString()
+                viewModel.revocationListUrl = if (url.isNullOrBlank()) null else url
+                viewModel.updateRevocationList()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showRevocationListInfo() {

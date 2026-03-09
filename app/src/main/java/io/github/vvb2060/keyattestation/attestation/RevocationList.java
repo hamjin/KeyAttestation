@@ -1,7 +1,6 @@
 package io.github.vvb2060.keyattestation.attestation;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
@@ -96,18 +95,29 @@ public record RevocationList(String status, String reason) {
      * @return 是否更新成功
      */
     public static boolean updateFromNetwork() {
-        var statusUrl = "https://android.googleapis.com/attestation/status";
-        var resName = "android:string/vendor_required_attestation_revocation_list_url";
-        var context = AppApplication.app;
-        var res = context.getResources();
+        return updateFromNetwork(null);
+    }
 
-        // 检查是否有自定义的URL
-        // noinspection DiscouragedApi
-        var id = res.getIdentifier(resName, null, null);
-        if (id != 0) {
-            var url = res.getString(id);
-            if (!statusUrl.equals(url) && url.toLowerCase(Locale.ROOT).startsWith("https")) {
-                statusUrl = url;
+    /**
+     * 从网络更新吊销列表
+     * @param statusUrl 吊销列表URL，为null时使用默认值
+     * @return 是否更新成功
+     */
+    public static boolean updateFromNetwork(String statusUrl) {
+        var context = AppApplication.app;
+        if (statusUrl == null || statusUrl.isEmpty()) {
+            statusUrl = "https://android.googleapis.com/attestation/status";
+            var resName = "android:string/vendor_required_attestation_revocation_list_url";
+            var res = context.getResources();
+
+            // 检查是否有自定义的URL
+            // noinspection DiscouragedApi
+            var id = res.getIdentifier(resName, null, null);
+            if (id != 0) {
+                var url = res.getString(id);
+                if (!statusUrl.equals(url) && url.toLowerCase(Locale.ROOT).startsWith("https")) {
+                    statusUrl = url;
+                }
             }
         }
 
