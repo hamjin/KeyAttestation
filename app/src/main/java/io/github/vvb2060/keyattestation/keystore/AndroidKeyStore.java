@@ -340,12 +340,20 @@ public class AndroidKeyStore extends IAndroidKeyStore.Stub {
         SystemProperties.set(RemoteProvisioning.PROP_NAME, hostname);
     }
 
-    @Override
-    public String getRkpHostname() {
+    public static String rkpHostname() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             throw new IllegalStateException();
         }
-        return SystemProperties.get(RemoteProvisioning.PROP_NAME);
+        if (SystemProperties.get(RemoteProvisioning.PROP_COUNTRY, RemoteProvisioning.COUNTRY_CN)
+                .toLowerCase().contains(RemoteProvisioning.COUNTRY_CN)) {
+            return SystemProperties.get(RemoteProvisioning.PROP_NAME_CN, RemoteProvisioning.HOSTNAME_CNXM);
+        }
+        return SystemProperties.get(RemoteProvisioning.PROP_NAME, RemoteProvisioning.HOSTNAME);
+    }
+
+    @Override
+    public String getRkpHostname() {
+        return rkpHostname();
     }
 
     @Override

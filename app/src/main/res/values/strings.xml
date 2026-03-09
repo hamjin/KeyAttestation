@@ -17,7 +17,7 @@
     <string name="save_certs">Save to file</string>
     <string name="update_revocation_list">Update revocation list</string>
     <string name="revocation_list_info">Revocation list info</string>
-    <string name="revocation_list_url">Revocation list URL</string>
+    <string name="revocation_list_url">Revocation List URL</string>
     <string name="revocation_list_url_google">Google</string>
     <string name="revocation_list_url_hamjin">hamjin</string>
     <string name="revocation_list_url_custom">Custom</string>

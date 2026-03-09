@@ -298,6 +298,7 @@ class HomeFragment : AppFragment(), HomeAdapter.Listener, MenuProvider {
                     viewModel.revocationListUrl = if (which == 0) null else selectedUrl
                     viewModel.updateRevocationList()
                 }
+                viewModel.load(true)
                 dialog.dismiss()
             }
             .setNegativeButton(android.R.string.cancel, null)

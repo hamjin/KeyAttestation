@@ -17,6 +17,7 @@
     <string name="save_certs">保存到文件</string>
     <string name="update_revocation_list">更新吊销列表</string>
     <string name="revocation_list_info">吊销列表信息</string>
+    <string name="revocation_list_url_custom">自定义</string>
     <string name="about">关于</string>
     <string name="open_source_info">此软件是 %2$s 下的开源软件（%1$s）。</string>
     <string name="install_shizuku">安装 Shizuku 使用 ID 认证（%s）。</string>
@@ -348,4 +349,6 @@
     <string name="knox_record_hash_description"><![CDATA[
     向 ICCC 请求完整性状态数据的 TA 的 SHA256 摘要。
     ]]></string>
+    <string name="revocation_list_url">吊销信息更新链接</string>
+    <string name="attest_rsa_key">校验RSA密钥</string>
 </resources>

@@ -43,7 +43,7 @@ class HomeViewModel(
     }
 
     private val attestationRepository = AttestationRepository()
-    private val attestationData = MutableLiveData<Resource<BaseData>>()
+    private val attestationData = MutableLiveData<Resource<BaseData>?>()
 
     val hasStrongBox = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
             pm.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
@@ -133,7 +133,7 @@ class HomeViewModel(
             sp.edit { putBoolean("prefer_attest_rsa_key", value) }
         }
 
-    var revocationListUrl = sp.getString("revocation_list_url", null)
+    var revocationListUrl = sp.getString("revocation_list_url", "")
         set(value) {
             field = value
             sp.edit { putString("revocation_list_url", value) }
@@ -145,7 +145,7 @@ class HomeViewModel(
 
     fun hasCertificates() = attestationRepository.hasCertificates()
 
-    fun getAttestationData(): LiveData<Resource<BaseData>> = attestationData
+    fun getAttestationData(): LiveData<Resource<BaseData>> = attestationData as LiveData<Resource<BaseData>>
 
     fun save(uri: Uri?) = AppApplication.executor.execute {
         if (uri == null || !attestationRepository.hasCertificates()) return@execute
@@ -240,11 +240,15 @@ class HomeViewModel(
     }
 
     fun updateRevocationList(url: String? = revocationListUrl) = AppApplication.executor.execute {
+        val currentData = attestationData.value
+        attestationData.postValue(Resource.loading(null))
         val success = RevocationList.updateFromNetwork(url)
         if (success) {
             AppApplication.toast("Revocation list updated successfully")
+            load()
         } else {
             AppApplication.toast("Failed to update revocation list")
+            attestationData.postValue(currentData)
         }
     }
 

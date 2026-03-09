@@ -42,8 +42,12 @@ import io.github.vvb2060.keyattestation.AppApplication;
 
 @RequiresApi(Build.VERSION_CODES.S)
 class RemoteProvisioning {
+    public static final String PROP_COUNTRY = "gsm.operator.iso-country";
+    public static final String COUNTRY_CN = "cn";
     public static final String PROP_NAME = "remote_provisioning.hostname";
+    public static final String PROP_NAME_CN = "remote_provisioning.hostname.cn";
     public static final String HOSTNAME = "remoteprovisioning.googleapis.com";
+    public static final String HOSTNAME_CNXM = "deviceapi.micloud.xiaomi.net/proxyGoogle";
     private static final String EEK_ED25519_BASE64 = """
             goRDoQEnoFgqpAEBAycgBiFYIJm57t1e5FL2hcZMYtw+YatXSH11NymtdoAy0rPL\
             Y1jZWEAeIghLpLekyNdOAw7+uK8UTKc7b6XN3Np5xitk/pk5r3bngPpmAIUNB5gq\
@@ -167,9 +171,8 @@ class RemoteProvisioning {
     }
 
     private static Uri.Builder getBaseUri() {
-        return new Uri.Builder()
+        return Uri.parse(AndroidKeyStore.rkpHostname()).buildUpon()
                 .scheme("https")
-                .authority(SystemProperties.get(PROP_NAME, HOSTNAME))
                 .appendPath("v1");
     }
 
